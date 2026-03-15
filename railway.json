@@ -2,7 +2,7 @@
   "$schema": "https://schema.railway.app/railway.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "cd backend && npm install"
+    "buildCommand": "cd frontend && npm install && VITE_API_URL='' npm run build && cd ../backend && npm install"
   },
   "deploy": {
     "startCommand": "cd backend && node server.js",
