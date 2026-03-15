@@ -12,6 +12,7 @@ const predictionRoutes = require('./routes/predictionRoutes');
 const allocationRoutes = require('./routes/allocationRoutes');
 const alternativeRoutes = require('./routes/alternativeRoutes');
 const trainRoutes = require('./routes/trainRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const { errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
@@ -52,6 +53,7 @@ app.use('/api/predictions', predictionRoutes);
 app.use('/api/allocations', allocationRoutes);
 app.use('/api/alternatives', alternativeRoutes);
 app.use('/api/trains', trainRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ── 404 handler ───────────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Route not found' }));

@@ -1,30 +1,66 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
+const GOLD = '#D4AF37';
+
 export default function Navbar() {
   const location = useLocation();
   const path = location.pathname;
 
+  const linkStyle = (route) => ({
+    color: path === route ? GOLD : 'rgba(255,255,255,0.7)',
+    textDecoration: 'none',
+    fontWeight: 600,
+    fontSize: '0.9rem',
+    transition: 'color 0.2s',
+    letterSpacing: '0.02em',
+  });
+
   return (
-    <nav style={{ 
-      padding: '20px 40px', 
-      display: 'flex', 
-      justifyContent: 'space-between', 
+    <nav style={{
+      padding: '0.875rem 2rem',
+      display: 'flex',
+      justifyContent: 'space-between',
       alignItems: 'center',
-      borderBottom: '1px solid var(--glass-border)',
-      background: 'rgba(10, 14, 26, 0.8)',
-      backdropFilter: 'blur(10px)',
+      borderBottom: '1px solid rgba(212,175,55,0.15)',
+      background: 'rgba(10,10,10,0.85)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
       position: 'sticky',
       top: 0,
-      zIndex: 100
+      zIndex: 100,
     }}>
-      <div style={{ fontWeight: 'bold', fontSize: '1.5rem', fontFamily: 'var(--font-display)' }}>
-        <Link to="/" style={{ color: 'var(--accent)', textDecoration: 'none' }}>RailWise</Link>
-      </div>
-      <div style={{ display: 'flex', gap: '24px' }}>
-        <Link to="/book" style={{ color: path === '/book' ? 'var(--accent)' : 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}>Book Ticket</Link>
-        <Link to="/status" style={{ color: path === '/status' ? 'var(--accent)' : 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}>Check Status (PNR)</Link>
-        <Link to="/alternatives" style={{ color: path === '/alternatives' ? 'var(--accent)' : 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}>Smart Alternatives</Link>
+      {/* Logo */}
+      <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{
+          width: '2rem', height: '2rem', backgroundColor: GOLD,
+          borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="18" height="18" fill="none" stroke="#0A0A0A" viewBox="0 0 24 24">
+            <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
+          </svg>
+        </div>
+        <span style={{ fontWeight: 800, fontSize: '1.25rem', color: 'white', letterSpacing: '-0.04em' }}>RailWise</span>
+      </Link>
+
+      {/* Nav Links */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <Link to="/book" style={linkStyle('/book')}>Book Ticket</Link>
+        <Link to="/status" style={linkStyle('/status')}>Check PNR</Link>
+        <Link to="/alternatives" style={linkStyle('/alternatives')}>Smart Routes</Link>
+        <Link to="/admin" style={{
+          color: path === '/admin' ? '#0A0A0A' : GOLD,
+          background: path === '/admin' ? GOLD : 'transparent',
+          textDecoration: 'none',
+          fontWeight: 700,
+          fontSize: '0.875rem',
+          border: `1px solid ${GOLD}`,
+          padding: '0.375rem 1rem',
+          borderRadius: '0.5rem',
+          transition: 'all 0.2s',
+        }}>
+          Operator Dashboard
+        </Link>
       </div>
     </nav>
   );

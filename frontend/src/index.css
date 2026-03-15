@@ -203,6 +203,32 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 }
 .fade-in { animation: fadeInUp 0.5s ease forwards; }
 
+/* ── Page transition animations ──────────────────────────── */
+
+/* Standard page → page: subtle slide up + fade */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Landing → page: bigger slide + blur dissolve */
+@keyframes pageEnterFromLanding {
+  from { opacity: 0; transform: translateY(36px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0px); }
+}
+
+/* Any page → landing: scale in from slightly-zoomed, fade */
+@keyframes landingEnter {
+  from { opacity: 0; transform: scale(1.04); filter: blur(4px); }
+  to   { opacity: 1; transform: scale(1);    filter: blur(0px); }
+}
+
+/* Applied by JS to the route wrapper */
+.route-enter           { animation: pageEnter            0.38s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.route-enter-from-landing { animation: pageEnterFromLanding 0.50s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.route-enter-landing   { animation: landingEnter         0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+
 /* ── Step indicator ───────────────────────────────────────── */
 .steps { display: flex; gap: 8px; margin-bottom: 32px; }
 .step {

@@ -6,8 +6,9 @@ router.get('/search', async (req, res) => {
   const { source, destination, date } = req.query;
   try {
     const [trains] = await pool.query(
-      `SELECT t.id, t.train_number, t.source, t.destination,
+      `SELECT t.id, t.train_number, t.train_name, t.source, t.destination,
               t.departure_time, t.arrival_time,
+              t.base_fare_sl, t.base_fare_3a, t.base_fare_2a, t.base_fare_1a,
               COUNT(s.id) as available_seats
        FROM trains t
        LEFT JOIN seats s ON s.train_id = t.id AND s.is_available = TRUE
