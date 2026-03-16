@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { getPredictionByPNR } from '../services/apiService';
 
 const GOLD = '#D4AF37';
 const BG = '#0A0A0A';
@@ -23,12 +24,10 @@ export default function CheckStatus() {
     if (!pnr) return;
     setLoading(true); setResult(null); setError(null);
     try {
-      const res = await fetch(`http://localhost:5000/api/predictions/${pnr}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Prediction failed');
+      const data = await getPredictionByPNR(pnr);
       setResult(data);
     } catch (err) {
-      setError(err.message);
+      setError(err?.response?.data?.error || err.message || 'Prediction failed');
     } finally {
       setLoading(false);
     }
