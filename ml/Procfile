@@ -1,1 +1,1 @@
-web: python predict_server.py
+web: gunicorn predict_server:app --bind 0.0.0.0:$PORT
