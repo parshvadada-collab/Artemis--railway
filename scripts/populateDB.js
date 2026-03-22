@@ -1,6 +1,6 @@
 'use strict';
 require('dotenv').config({ path: '../.env' });
-const mysql = require('mysql2/promise');
+const mysql = require('pg');
 
 const STATIONS = [
   'Ahmedabad', 'Bangalore', 'Bhubaneswar', 'Chennai',
@@ -19,90 +19,92 @@ const CLASSES = ['SL', '3A', '2A', '1A'];
 const SEATS_PER_CLASS = { SL: 25, '3A': 15, '2A': 7, '1A': 3 };
 
 async function main() {
-    const conn = await mysql.createConnection({
+    const conn = new (require('pg').Client)({
         host: process.env.DB_HOST || 'localhost',
-        user: process.env.DB_USER || 'root',
+        user: process.env.DB_USER || 'postgres',
         password: process.env.DB_PASSWORD || '',
         database: process.env.DB_NAME || 'railway_db',
+        ssl: { rejectUnauthorized: false }
     });
+    await conn.connect();
 
     console.log('Connected to DB. Resetting tables...');
 
     // Create schema
-    await conn.execute(`
+    await conn.query(`
     CREATE TABLE IF NOT EXISTS passengers (
-      id      INT AUTO_INCREMENT PRIMARY KEY,
+      id      SERIAL PRIMARY KEY,
       name    VARCHAR(100) NOT NULL,
-      age     TINYINT UNSIGNED NOT NULL,
+      age     SMALLINT NOT NULL,
       contact VARCHAR(20) NOT NULL
-    ) ENGINE=InnoDB;
+    ) ;
     `);
 
-    await conn.execute(`
+    await conn.query(`
     CREATE TABLE IF NOT EXISTS trains (
-      id             INT AUTO_INCREMENT PRIMARY KEY,
+      id             SERIAL PRIMARY KEY,
       train_number   VARCHAR(10) NOT NULL UNIQUE,
       train_name     VARCHAR(100) DEFAULT 'Express',
       source         VARCHAR(100) NOT NULL,
       destination    VARCHAR(100) NOT NULL,
-      departure_time DATETIME NOT NULL,
-      arrival_time   DATETIME NOT NULL,
+      departure_time TIMESTAMP NOT NULL,
+      arrival_time   TIMESTAMP NOT NULL,
       distance_km    INT DEFAULT 0,
       total_seats    INT DEFAULT 44,
       base_fare_sl   INT DEFAULT 450,
       base_fare_3a   INT DEFAULT 980,
       base_fare_2a   INT DEFAULT 1450,
       base_fare_1a   INT DEFAULT 2800
-    ) ENGINE=InnoDB;
+    ) ;
     `);
 
-    await conn.execute(`
+    await conn.query(`
     CREATE TABLE IF NOT EXISTS seats (
-      id           INT AUTO_INCREMENT PRIMARY KEY,
+      id           SERIAL PRIMARY KEY,
       train_id     INT NOT NULL,
       seat_number  VARCHAR(10) NOT NULL,
-      class        ENUM('SL','3A','2A','1A') NOT NULL,
+      class        VARCHAR(5) NOT NULL,
       is_available BOOLEAN DEFAULT TRUE,
       FOREIGN KEY (train_id) REFERENCES trains(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB;
+    ) ;
     `);
 
-    await conn.execute(`
+    await conn.query(`
     CREATE TABLE IF NOT EXISTS bookings (
-      id                INT AUTO_INCREMENT PRIMARY KEY,
+      id                SERIAL PRIMARY KEY,
       passenger_id      INT NOT NULL,
       train_id          INT NOT NULL,
       seat_id           INT,
       pnr_code          VARCHAR(12) NOT NULL UNIQUE,
-      status            ENUM('confirmed','waitlisted','cancelled') NOT NULL DEFAULT 'waitlisted',
-      booking_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+      status            VARCHAR(20) NOT NULL DEFAULT 'waitlisted',
+      booking_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (passenger_id) REFERENCES passengers(id),
       FOREIGN KEY (train_id)     REFERENCES trains(id),
       FOREIGN KEY (seat_id)      REFERENCES seats(id)
-    ) ENGINE=InnoDB;
+    ) ;
     `);
 
-    await conn.execute(`
+    await conn.query(`
     CREATE TABLE IF NOT EXISTS waitlist (
-      id             INT AUTO_INCREMENT PRIMARY KEY,
+      id             SERIAL PRIMARY KEY,
       booking_id     INT NOT NULL UNIQUE,
       position       INT NOT NULL,
-      assigned_class ENUM('SL','3A','2A','1A') NOT NULL,
+      assigned_class VARCHAR(5) NOT NULL,
       FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB;
+    ) ;
     `);
 
-    await conn.execute('SET FOREIGN_KEY_CHECKS = 0');
-    await conn.execute('DELETE FROM waitlist');
-    await conn.execute('DELETE FROM bookings');
-    await conn.execute('DELETE FROM seats');
-    await conn.execute('DELETE FROM trains');
+    await conn.query('-- SET FOREIGN_KEY_CHECKS = 0');
+    await conn.query('DELETE FROM waitlist');
+    await conn.query('DELETE FROM bookings');
+    await conn.query('DELETE FROM seats');
+    await conn.query('DELETE FROM trains');
     
-    await conn.execute('ALTER TABLE trains AUTO_INCREMENT = 1');
-    await conn.execute('ALTER TABLE seats AUTO_INCREMENT = 1');
-    await conn.execute('ALTER TABLE bookings AUTO_INCREMENT = 1');
-    await conn.execute('ALTER TABLE waitlist AUTO_INCREMENT = 1');
-    await conn.execute('SET FOREIGN_KEY_CHECKS = 1');
+    await conn.query('ALTER TABLE trains SERIAL = 1');
+    await conn.query('ALTER TABLE seats SERIAL = 1');
+    await conn.query('ALTER TABLE bookings SERIAL = 1');
+    await conn.query('ALTER TABLE waitlist SERIAL = 1');
+    await conn.query('-- SET FOREIGN_KEY_CHECKS = 1');
 
     console.log('Cleared old db data. Generating 30 days of schedules for all 210 routes...');
 
@@ -130,7 +132,7 @@ async function main() {
         if (trainsValues.length === 0) return;
         const placeholders = trainsValues.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
         const flatArgs = trainsValues.flat();
-        await conn.execute(
+        await conn.query(
             `INSERT INTO trains (id, train_number, train_name, source, destination, departure_time, arrival_time, distance_km, total_seats, base_fare_sl, base_fare_3a, base_fare_2a, base_fare_1a) VALUES ${placeholders}`,
             flatArgs
         );
@@ -141,7 +143,7 @@ async function main() {
         if (seatsValues.length === 0) return;
         const placeholders = seatsValues.map(() => '(?, ?, ?)').join(',');
         const flatArgs = seatsValues.flat();
-        await conn.execute(
+        await conn.query(
             `INSERT INTO seats (train_id, seat_number, class) VALUES ${placeholders}`,
             flatArgs
         );
@@ -225,3 +227,5 @@ async function main() {
 }
 
 main().catch(err => { console.error('Error during DB population:', err); process.exit(1); });
+
+
