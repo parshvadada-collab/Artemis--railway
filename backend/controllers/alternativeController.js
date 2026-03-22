@@ -59,6 +59,8 @@ async function getAlternatives(req, res, next) {
             alternatives.push({
                 legs: [{
                     train_number: r.train_number,
+                    source: r.source,
+                    destination: r.destination,
                     departure: r.departure_time,
                     arrival: r.arrival_time,
                     class_available: r.class_available || 'SL',
@@ -96,6 +98,8 @@ async function getAlternatives(req, res, next) {
                     legs: [
                         {
                             train_number: l1.train_number,
+                            source: l1.source,
+                            destination: intermediate,
                             departure: l1.departure_time,
                             arrival: l1.arrival_time,
                             class_available: l1.class_available || 'SL',
@@ -103,6 +107,8 @@ async function getAlternatives(req, res, next) {
                         },
                         {
                             train_number: l2.train_number,
+                            source: l2.source,
+                            destination: l2.destination,
                             departure: l2.departure_time,
                             arrival: l2.arrival_time,
                             class_available: l2.class_available || 'SL',

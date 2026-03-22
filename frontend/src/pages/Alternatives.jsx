@@ -136,7 +136,7 @@ export default function Alternatives() {
           {error && <p style={{ color: '#f87171', fontSize: '0.85rem', marginTop: '1rem', marginBottom: 0 }}>⚠ {error}</p>}
 
           <button onClick={() => searchAlternatives(preference)} disabled={loading} style={{
-            marginTop: '1.5rem',
+            width: '100%', marginTop: '1.5rem',
             background: loading ? 'rgba(212,175,55,0.4)' : GOLD,
             color: '#0A0A0A', border: 'none', padding: '0.875rem 2.5rem',
             borderRadius: '0.875rem', fontSize: '0.95rem', fontWeight: 700,
@@ -212,19 +212,12 @@ export default function Alternatives() {
                 <span style={{ fontWeight: 800, color: GOLD, fontSize: '1.2rem' }}>{alt.transfers}</span>
                 <p style={{ margin: '0.15rem 0 0', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Transfers</p>
               </div>
-
-              <button onClick={() => navigate('/book')} style={{
-                background: GOLD, color: '#0A0A0A', border: 'none',
-                padding: '0.625rem 1.5rem', borderRadius: '0.75rem',
-                fontWeight: 700, cursor: 'pointer', fontSize: '0.875rem',
-                transition: 'opacity 0.2s'
-              }}>Book Route</button>
             </div>
 
             {/* Legs */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {alt.legs.map((leg, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '0.875rem' }}>
                   <div style={{
                     background: 'rgba(0,0,0,0.4)', padding: '0.625rem 1rem',
                     borderRadius: '0.625rem', border: `1px solid ${BORDER}`,
@@ -236,15 +229,22 @@ export default function Alternatives() {
 
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white', marginBottom: '0.25rem' }}>
-                      <span style={{ fontWeight: 700 }}>{leg.departure?.slice(11, 16)}</span>
+                      <span style={{ fontWeight: 700 }} title={leg.source}>{leg.source?.slice(0, 15)} {leg.departure?.slice(11, 16)}</span>
                       <span style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
-                      <span style={{ fontWeight: 700 }}>{leg.arrival?.slice(11, 16)}</span>
+                      <span style={{ fontWeight: 700 }} title={leg.destination}>{leg.destination?.slice(0, 15)} {leg.arrival?.slice(11, 16)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem' }}>
                       <span>{new Date(leg.departure).toLocaleDateString('en-GB')}</span>
                       <span>{new Date(leg.arrival).toLocaleDateString('en-GB')}</span>
                     </div>
                   </div>
+
+                  <button onClick={() => navigate(`/book?source=${leg.source}&destination=${leg.destination}&date=${leg.departure?.slice(0, 10)}&class=${leg.class_available}`)} style={{
+                    background: GOLD, color: '#0A0A0A', border: 'none',
+                    padding: '0.625rem 1.25rem', borderRadius: '0.625rem',
+                    fontWeight: 700, cursor: 'pointer', fontSize: '0.8rem',
+                    transition: 'opacity 0.2s', whiteSpace: 'nowrap'
+                  }}>Book Leg</button>
                 </div>
               ))}
             </div>

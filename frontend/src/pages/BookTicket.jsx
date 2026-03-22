@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 
 const GOLD = '#D4AF37';
@@ -77,6 +77,7 @@ const labelStyle = {
 
 export default function BookTicket() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [trains, setTrains] = useState([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -86,29 +87,43 @@ export default function BookTicket() {
   const [selectedTrain, setSelectedTrain] = useState(null);
   const [showPassenger, setShowPassenger] = useState(false);
 
-  const [journey, setJourney] = useState({ source: '', destination: '', date: '', class: 'SL' });
+  const [journey, setJourney] = useState({
+    source: searchParams.get('source') || '',
+    destination: searchParams.get('destination') || '',
+    date: searchParams.get('date') || '',
+    class: searchParams.get('class') || 'SL'
+  });
   const [passenger, setPassenger] = useState({ name: '', age: '', contact: '' });
+
+  const hasAutoSearched = useRef(false);
+
+  useEffect(() => {
+    if (journey.source && journey.destination && journey.date && !hasAutoSearched.current) {
+      hasAutoSearched.current = true;
+      searchTrainsObj(journey);
+    }
+  }, [journey]);
 
   const swapStations = () => {
     setJourney(j => ({ ...j, source: j.destination, destination: j.source }));
     setTrains([]); setSearched(false); setSelectedTrain(null);
   };
 
-  const searchTrains = async () => {
-    if (!journey.source || !journey.destination || !journey.date) {
+  const searchTrainsObj = async (jrn) => {
+    if (!jrn.source || !jrn.destination || !jrn.date) {
       setError('Please fill source, destination and date'); return;
     }
-    if (journey.source === journey.destination) {
+    if (jrn.source === jrn.destination) {
       setError('Source and destination cannot be same'); return;
     }
     setError(''); setLoading(true); setSearched(false);
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/trains/search`,
-        { params: { source: journey.source, destination: journey.destination, date: journey.date } }
+        { params: { source: jrn.source, destination: jrn.destination, date: jrn.date } }
       );
       const allTrains = res.data.trains || [];
-      const filtered = filterDepartedTrains(allTrains, journey.date);
+      const filtered = filterDepartedTrains(allTrains, jrn.date);
       setTrains(filtered);
       if (filtered.length === 0 && allTrains.length > 0) {
         setError('All trains for today have already departed. Please select a future date.');
@@ -120,6 +135,8 @@ export default function BookTicket() {
       setLoading(false);
     }
   };
+
+  const searchTrains = () => searchTrainsObj(journey);
 
   const selectTrain = (train) => { setSelectedTrain(train); setShowPassenger(true); setError(''); };
 
@@ -212,7 +229,7 @@ export default function BookTicket() {
           {error && <p style={{ color: '#f87171', fontSize: '0.85rem', marginTop: '1rem', marginBottom: 0 }}>⚠ {error}</p>}
 
           <button onClick={searchTrains} disabled={loading} style={{
-            marginTop: '1.5rem', background: loading ? 'rgba(212,175,55,0.4)' : GOLD,
+            width: '100%', marginTop: '1.5rem', background: loading ? 'rgba(212,175,55,0.4)' : GOLD,
             color: '#0A0A0A', border: 'none', padding: '0.875rem 2.5rem',
             borderRadius: '0.875rem', fontSize: '0.95rem', fontWeight: 700,
             cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '0.03em',
