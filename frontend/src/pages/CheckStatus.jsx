@@ -121,7 +121,18 @@ export default function CheckStatus() {
     }
   };
 
-  const probPercent     = result ? Math.round(result.confirmation_probability * 100) : 0;
+  const [displayProb, setDisplayProb] = useState(0);
+  useEffect(() => {
+    if (result) {
+      setDisplayProb(0); // reset if PNR changes
+      const t = setTimeout(() => setDisplayProb(result.confirmation_probability), 100);
+      return () => clearTimeout(t);
+    } else {
+      setDisplayProb(0);
+    }
+  }, [result]);
+
+  const probPercent     = result ? Math.round(displayProb * 100) : 0;
   const isConfirmed     = result?.status === 'confirmed';
   const isWaitlisted    = result?.status === 'waitlisted';
   const confidenceColor = isConfirmed
@@ -234,11 +245,11 @@ export default function CheckStatus() {
               {/* Status row */}
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.75rem' }}>
                 <div>
-                  <div style={{ fontSize:'0.65rem', fontWeight:700, color:'rgba(255,255,255,0.35)',
+                  <div style={{ fontSize:'0.65rem', fontWeight:800, color:'rgba(255,255,255,0.4)',
                     letterSpacing:'0.15em', textTransform:'uppercase', marginBottom:'0.2rem' }}>
                     PNR Status
                   </div>
-                  <div style={{ fontSize:'0.95rem', fontWeight:700, color:'white' }}>{result.pnr}</div>
+                  <div style={{ fontSize:'1.3rem', fontWeight:900, color:'white', letterSpacing:'0.15em' }}>{result.pnr}</div>
                 </div>
                 <span style={{
                   padding:'0.5rem 1.1rem', borderRadius:'9999px', fontSize:'0.8rem', fontWeight:800,
@@ -253,14 +264,14 @@ export default function CheckStatus() {
 
               {/* Circular gauge */}
               <div style={{ textAlign:'center', marginBottom:'1.5rem' }}>
-                <div style={{ position:'relative', width:'11rem', height:'11rem', margin:'0 auto 1.25rem' }}>
-                  <svg width="176" height="176" viewBox="0 0 176 176" style={{ transform:'rotate(-90deg)' }}>
-                    <circle cx="88" cy="88" r="74" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="12" />
-                    <circle cx="88" cy="88" r="74" fill="none" stroke={confidenceColor} strokeWidth="12"
+                <div style={{ position:'relative', width:'11.5rem', height:'11.5rem', margin:'0 auto 1.25rem' }}>
+                  <svg width="184" height="184" viewBox="0 0 184 184" style={{ transform:'rotate(-90deg)' }}>
+                    <circle cx="92" cy="92" r="78" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="12" />
+                    <circle cx="92" cy="92" r="78" fill="none" stroke={displayProb === 0 ? 'transparent' : confidenceColor} strokeWidth="12"
                       strokeLinecap="round"
-                      strokeDasharray={`${2 * Math.PI * 74}`}
-                      strokeDashoffset={`${2 * Math.PI * 74 * (1 - result.confirmation_probability)}`}
-                      style={{ transition:'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1), stroke 0.4s' }}
+                      strokeDasharray={`${2 * Math.PI * 78}`}
+                      strokeDashoffset={`${2 * Math.PI * 78 * (1 - displayProb)}`}
+                      style={{ transition:'stroke-dashoffset 1.3s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.4s' }}
                     />
                   </svg>
                   <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column',

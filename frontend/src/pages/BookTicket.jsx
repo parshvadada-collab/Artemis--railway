@@ -436,64 +436,80 @@ function SuccessCard({ result, passenger, navigate, onReset }) {
     <>
     <style dangerouslySetInnerHTML={{ __html: CSS }} />
     <div style={{ minHeight: '100vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <div className="animate-up" style={{
-        background: CARD, borderRadius: '2rem', padding: '3rem 2.5rem',
-        maxWidth: '28rem', width: '100%', textAlign: 'center',
-        border: `1px solid ${isConfirmed ? 'rgba(74,222,128,0.3)' : GOLD_BORDER}`,
-        backdropFilter: 'blur(16px)'
-      }}>
-        <div style={{
-          width: '5rem', height: '5rem',
-          background: isConfirmed ? 'rgba(74,222,128,0.1)' : 'rgba(212,175,55,0.1)',
-          border: `2px solid ${isConfirmed ? 'rgba(74,222,128,0.5)' : GOLD}`,
-          borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '2rem', margin: '0 auto 1.5rem'
+        {/* Boarding Pass Design */}
+        <div className="ticket-container" style={{
+          position: 'relative', width: '100%', maxWidth: '28rem', margin: '0 auto',
+          background: 'white', borderRadius: '1.5rem', overflow: 'hidden',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
         }}>
-          {isConfirmed ? '✅' : '⏳'}
-        </div>
-
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', marginBottom: '0.5rem', letterSpacing: '-0.03em' }}>
-          {isConfirmed ? 'Booking Confirmed!' : 'Added to Waitlist'}
-        </h2>
-        <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '2rem', fontSize: '0.95rem' }}>
-          {isConfirmed ? 'Your seat has been reserved successfully.' : 'Our ML engine is tracking your confirmation probability.'}
-        </p>
-
-        {/* PNR Display */}
-        <div style={{
-          background: 'rgba(0,0,0,0.4)', borderRadius: '1rem', padding: '1.25rem 1.5rem',
-          marginBottom: '1.5rem', border: `1px dashed rgba(212,175,55,0.4)`
-        }}>
-          <p style={{ color: 'rgba(212,175,55,0.7)', fontSize: '0.65rem', margin: '0 0 0.5rem', letterSpacing: '0.2em', fontWeight: 700 }}>PNR NUMBER</p>
-          <p style={{ fontSize: '2.25rem', fontWeight: 900, letterSpacing: '0.2em', color: GOLD, margin: 0 }}>{result.pnr_code}</p>
-        </div>
-
-        {/* Details */}
-        <div style={{ textAlign: 'left', marginBottom: '2rem' }}>
-          {[['Passenger', passenger.name], ['Status', result.status?.toUpperCase()], ['Class', result.seat_class]].map(([k, v]) => (
-            <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: `1px solid ${BORDER}` }}>
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.875rem' }}>{k}</span>
-              <span style={{ color: 'white', fontWeight: 600, fontSize: '0.875rem' }}>{v}</span>
+          {/* Top Section */}
+          <div style={{ background: isConfirmed ? '#10b981' : GOLD, padding: '2rem', textAlign: 'center', color: isConfirmed ? 'white' : '#0A0A0A' }}>
+            <div style={{
+              width: '4rem', height: '4rem', background: 'white', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem',
+              fontSize: '2rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+            }}>
+              {isConfirmed ? '✅' : '⏳'}
             </div>
-          ))}
-        </div>
+            <h2 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em' }}>
+              {isConfirmed ? 'Booking Confirmed' : 'Waitlisted'}
+            </h2>
+            <p style={{ margin: '0.25rem 0 0', opacity: 0.9, fontSize: '0.95rem', fontWeight: 600 }}>
+              {isConfirmed ? 'Your seat has been reserved successfully.' : 'Our AI is tracking your confirmation probability.'}
+            </p>
+          </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button onClick={() => navigate('/status?pnr=' + result.pnr_code)} style={{
-            flex: 1, background: GOLD, color: '#0A0A0A', border: 'none',
-            padding: '0.875rem', borderRadius: '0.875rem', fontWeight: 700, cursor: 'pointer'
-          }}>
-            Check Prediction
-          </button>
-          <button onClick={onReset} style={{
-            flex: 1, background: 'transparent', color: 'rgba(255,255,255,0.6)',
-            border: `1px solid ${BORDER}`, padding: '0.875rem',
-            borderRadius: '0.875rem', cursor: 'pointer', fontWeight: 600
-          }}>
-            Book Another
-          </button>
+          {/* Cutout Separator */}
+          <div style={{ position: 'relative', height: '2rem', background: 'white', display: 'flex', alignItems: 'center' }}>
+            <div style={{ position: 'absolute', left: '-1rem', width: '2rem', height: '2rem', background: BG, borderRadius: '50%' }}></div>
+            <div style={{ flex: 1, borderTop: '2px dashed #e5e7eb', margin: '0 1.5rem' }}></div>
+            <div style={{ position: 'absolute', right: '-1rem', width: '2rem', height: '2rem', background: BG, borderRadius: '50%' }}></div>
+          </div>
+
+          {/* Ticket Details */}
+          <div style={{ padding: '1rem 2.5rem 2.5rem', background: 'white', color: '#111827', textAlign: 'left' }}>
+            
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              <p style={{ margin: '0 0 0.25rem', fontSize: '0.75rem', fontWeight: 800, color: '#6b7280', letterSpacing: '0.15em', textTransform: 'uppercase' }}>PNR Number</p>
+              <h1 style={{ margin: 0, fontSize: '2.5rem', fontWeight: 900, letterSpacing: '0.2em', color: '#111827' }}>
+                {result.pnr_code}
+              </h1>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+              <div>
+                <p style={{ margin: '0 0 0.25rem', fontSize: '0.7rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Passenger</p>
+                <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>{passenger.name}</p>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 0.25rem', fontSize: '0.7rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Class</p>
+                <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#111827' }}>{result.seat_class}</p>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 0.25rem', fontSize: '0.7rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Status</p>
+                <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: isConfirmed ? '#10b981' : '#d97706' }}>{result.status?.toUpperCase()}</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+              <button onClick={() => navigate('/status?pnr=' + result.pnr_code)} style={{
+                flex: 1, background: '#111827', color: 'white', border: 'none',
+                padding: '1rem', borderRadius: '0.75rem', fontWeight: 800, cursor: 'pointer',
+                transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+              }} onMouseOver={e=>e.currentTarget.style.transform='translateY(-2px)'} onMouseOut={e=>e.currentTarget.style.transform='none'}>
+                View Prediction
+              </button>
+              <button onClick={onReset} style={{
+                background: '#f3f4f6', color: '#4b5563', border: 'none',
+                padding: '1rem', borderRadius: '0.75rem', fontWeight: 800, cursor: 'pointer',
+                transition: 'background 0.2s'
+              }} onMouseOver={e=>e.currentTarget.style.background='#e5e7eb'} onMouseOut={e=>e.currentTarget.style.background='#f3f4f6'}>
+                Book Another
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
     </div>
     </>
   );
