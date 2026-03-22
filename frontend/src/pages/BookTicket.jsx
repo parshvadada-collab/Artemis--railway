@@ -8,6 +8,23 @@ const CARD = 'rgba(255,255,255,0.04)';
 const BORDER = 'rgba(255,255,255,0.1)';
 const GOLD_BORDER = 'rgba(212,175,55,0.3)';
 
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+  * { box-sizing: border-box; }
+  
+  @keyframes fadeSlideUp {
+    from { opacity:0; transform:translateY(30px); }
+    to   { opacity:1; transform:translateY(0);    }
+  }
+  @keyframes fadeSlideInRight {
+    from { opacity:0; transform:translateX(30px); }
+    to   { opacity:1; transform:translateX(0);    }
+  }
+  .animate-up { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .train-card { animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .train-card:hover { border-color: ${GOLD} !important; background: rgba(255,255,255,0.06) !important; transform: translateY(-3px); }
+`;
+
 const STATIONS = [
   'Ahmedabad', 'Bangalore', 'Bhubaneswar', 'Chennai',
   'Delhi', 'Hyderabad', 'Indore', 'Jaipur',
@@ -20,6 +37,13 @@ const CLASSES = [
   { code: '3A', label: 'AC 3 Tier (3A)', icon: '❄' },
   { code: '2A', label: 'AC 2 Tier (2A)', icon: '❄❄' },
   { code: '1A', label: 'AC First Class (1A)', icon: '👑' },
+];
+
+const QUOTAS = [
+  { code: 'GN', label: 'General (GN)' },
+  { code: 'TQ', label: 'Tatkal (TQ)' },
+  { code: 'LD', label: 'Ladies (LD)' },
+  { code: 'PT', label: 'Premium Tatkal (PT)' },
 ];
 
 // ── IST Helpers & Time Formatters ─────────────────────────────────────────
@@ -91,7 +115,8 @@ export default function BookTicket() {
     source: searchParams.get('source') || '',
     destination: searchParams.get('destination') || '',
     date: searchParams.get('date') || '',
-    class: searchParams.get('class') || 'SL'
+    class: searchParams.get('class') || 'SL',
+    quota: searchParams.get('quota') || 'GN'
   });
   const [passenger, setPassenger] = useState({ name: '', age: '', contact: '' });
 
@@ -147,7 +172,7 @@ export default function BookTicket() {
     setBooking(true); setError('');
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/bookings`, {
-        name, age: parseInt(age), contact, train_id: selectedTrain.id, seat_class: journey.class
+        name, age: parseInt(age), contact, train_id: selectedTrain.id, seat_class: journey.class, quota: journey.quota
       });
       res.data.seat_class = journey.class;
       res.data.passenger_name = passenger.name;
@@ -160,8 +185,10 @@ export default function BookTicket() {
     onReset={() => { setResult(null); setSelectedTrain(null); setShowPassenger(false); setSearched(false); setTrains([]); }} />;
 
   return (
-    <div style={{ minHeight: '100vh', background: BG, color: 'white', padding: '2.5rem 1.5rem 5rem' }}>
-      <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
+    <>
+    <style dangerouslySetInnerHTML={{ __html: CSS }} />
+    <div style={{ minHeight: '100vh', background: BG, color: 'white', padding: '2.5rem 1.5rem 5rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <div style={{ maxWidth: '56rem', margin: '0 auto' }} className="animate-up">
 
         {/* Page Header */}
         <div style={{ marginBottom: '2.5rem' }}>
@@ -224,6 +251,13 @@ export default function BookTicket() {
                 {CLASSES.map(c => <option key={c.code} value={c.code} style={{ background: '#111' }}>{c.icon} {c.label}</option>)}
               </select>
             </div>
+
+            <div style={{ flex: '1 1 140px' }}>
+              <label style={labelStyle}>Quota</label>
+              <select value={journey.quota} onChange={e => setJourney({ ...journey, quota: e.target.value })} style={{ ...inputStyle, cursor: 'pointer' }}>
+                {QUOTAS.map(q => <option key={q.code} value={q.code} style={{ background: '#111' }}>{q.label}</option>)}
+              </select>
+            </div>
           </div>
 
           {error && <p style={{ color: '#f87171', fontSize: '0.85rem', marginTop: '1rem', marginBottom: 0 }}>⚠ {error}</p>}
@@ -259,12 +293,13 @@ export default function BookTicket() {
         )}
 
         {/* Train Results */}
-        {trains.map(train => (
-          <div key={train.id} style={{
+        {trains.map((train, i) => (
+          <div key={train.id} className="train-card" style={{
+            animationDelay: `${0.1 + i * 0.05}s`,
             background: CARD, borderRadius: '1.25rem', padding: '1.5rem',
             marginBottom: '1rem',
             border: selectedTrain?.id === train.id ? `1px solid ${GOLD}` : `1px solid ${BORDER}`,
-            backdropFilter: 'blur(8px)', transition: 'border-color 0.2s'
+            backdropFilter: 'blur(8px)', transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
           }}>
             {/* Train Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
@@ -385,14 +420,17 @@ export default function BookTicket() {
         )}
       </div>
     </div>
+    </>
   );
 }
 
 function SuccessCard({ result, passenger, navigate, onReset }) {
   const isConfirmed = result.status === 'confirmed';
   return (
-    <div style={{ minHeight: '100vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-      <div style={{
+    <>
+    <style dangerouslySetInnerHTML={{ __html: CSS }} />
+    <div style={{ minHeight: '100vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <div className="animate-up" style={{
         background: CARD, borderRadius: '2rem', padding: '3rem 2.5rem',
         maxWidth: '28rem', width: '100%', textAlign: 'center',
         border: `1px solid ${isConfirmed ? 'rgba(74,222,128,0.3)' : GOLD_BORDER}`,
@@ -451,5 +489,6 @@ function SuccessCard({ result, passenger, navigate, onReset }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
