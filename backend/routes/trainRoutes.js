@@ -6,11 +6,12 @@ router.get('/search', async (req, res) => {
   const { source, destination, date, class: seatClass, quota } = req.query;
   try {
     let seatFilterQuery = 's.is_available = TRUE';
-    const params = [source, destination, date];
+    const params = [];
     if (seatClass) {
         seatFilterQuery += ' AND s.class = ?';
         params.push(seatClass);
     }
+    params.push(source, destination, date);
 
     const [trains] = await pool.query(
       `SELECT t.id, t.train_number, t.train_name, t.source, t.destination,
