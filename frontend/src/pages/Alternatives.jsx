@@ -77,7 +77,7 @@ export default function Alternatives() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: BG, color: 'white', padding: '2.5rem 1.5rem 5rem' }}>
+    <div style={{ minHeight: '100vh', background: 'transparent', color: 'white', padding: '2.5rem 1.5rem 5rem' }}>
       <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
 
         {/* Page Header */}

@@ -193,7 +193,7 @@ export default function BookTicket() {
   return (
     <>
     <style dangerouslySetInnerHTML={{ __html: CSS }} />
-    <div style={{ minHeight: '100vh', background: BG, color: 'white', padding: '2.5rem 1.5rem 5rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ minHeight: '100vh', color: 'white', padding: '2.5rem 1.5rem 5rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <div style={{ maxWidth: '56rem', margin: '0 auto' }} className="animate-up">
 
         {/* Page Header */}
@@ -435,7 +435,7 @@ function SuccessCard({ result, passenger, navigate, onReset }) {
   return (
     <>
     <style dangerouslySetInnerHTML={{ __html: CSS }} />
-    <div style={{ minHeight: '100vh', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
         {/* Boarding Pass Design */}
         <div className="ticket-container" style={{
           position: 'relative', width: '100%', maxWidth: '28rem', margin: '0 auto',

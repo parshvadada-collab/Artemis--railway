@@ -48,7 +48,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: BG, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', background: 'transparent', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: '3rem', height: '3rem', border: `3px solid ${GOLD_BORDER}`, borderTopColor: GOLD, borderRadius: '50%', margin: '0 auto 1rem', animation: 'spin 0.8s linear infinite' }}></div>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
   ] : [];
 
   return (
-    <div style={{ minHeight: '100vh', background: BG, color: 'white', padding: '2.5rem 1.5rem 5rem' }}>
+    <div style={{ minHeight: '100vh', background: 'transparent', color: 'white', padding: '2.5rem 1.5rem 5rem' }}>
       <div style={{ maxWidth: '75rem', margin: '0 auto' }}>
 
         {/* Header */}

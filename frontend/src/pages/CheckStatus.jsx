@@ -144,7 +144,7 @@ export default function CheckStatus() {
   const quotaInfo = QUOTA_LABELS[result?.quota] || {};
 
   return (
-    <div style={{ minHeight:'100vh', background:BG, color:'white', padding:'2.5rem 1rem 6rem' }}>
+    <div style={{ minHeight:'100vh', background: 'transparent', color:'white', padding:'2.5rem 1rem 6rem' }}>
       <style>{CSS}</style>
 
       <div style={{ maxWidth:'40rem', margin:'0 auto' }}>
