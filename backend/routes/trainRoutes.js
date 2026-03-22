@@ -21,7 +21,7 @@ router.get('/search', async (req, res) => {
        FROM trains t
        LEFT JOIN seats s ON s.train_id = t.id AND ${seatFilterQuery}
        WHERE t.source = ? AND t.destination = ?
-         AND DATE(CONVERT_TZ(t.departure_time, '+00:00', '+05:30')) = ?
+         AND DATE(t.departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata') = ?
        GROUP BY t.id`,
       params
     );

@@ -31,6 +31,10 @@ function enhanceClient(client) {
       pgSql = sql.replace(/\?/g, () => `$${i++}`);
     }
 
+    // AST syntax conversions from MySQL -> PostgreSQL!
+    pgSql = pgSql.replace(/DATE\(CONVERT_TZ\(([^,]+),\s*'[^']+',\s*'[^']+'\)\)/gi, "DATE($1 AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata')");
+    pgSql = pgSql.replace(/ORDER BY FIELD\(([^,]+),\s*'SL',\s*'3A',\s*'2A',\s*'1A'\)/gi, "ORDER BY array_position(ARRAY['SL','3A','2A','1A']::varchar[], $1::varchar)");
+
     // Postgres requires RETURNING to get insert IDs
     const isInsert = /^\s*INSERT\s/i.test(pgSql);
     if (isInsert && !/RETURNING/i.test(pgSql)) {
