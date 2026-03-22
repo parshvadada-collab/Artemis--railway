@@ -310,7 +310,7 @@ const LandingPage = () => {
         </section>
 
         {/* Features Section */}
-        <section style={{ position: 'relative', zIndex: 1, minHeight: '100vh', padding: '8rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)' }}>
+        <section style={{ position: 'relative', zIndex: 1, minHeight: '100vh', padding: '8rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,10,0.85) 15%, rgba(10,10,10,0.85) 100%)' }}>
           <div style={{ maxWidth: '80rem', width: '100%', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
             {[
               {
@@ -344,7 +344,7 @@ const LandingPage = () => {
               <div key={i} className="glass-card" style={{
                 padding: '2rem', borderRadius: '1.5rem',
                 display: 'flex', flexDirection: 'column', gap: '1rem',
-                transition: 'border-color 0.2s'
+                transition: 'border-color 0.2s', background: 'rgba(255, 255, 255, 0.03)'
               }}
                 onMouseOver={e => e.currentTarget.style.borderColor = 'rgba(212,175,55,0.5)'}
                 onMouseOut={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}>
@@ -362,7 +362,7 @@ const LandingPage = () => {
         </section>
 
         {/* CTA Section */}
-        <section style={{ position: 'relative', zIndex: 1, minHeight: '60vh', padding: '8rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <section style={{ position: 'relative', zIndex: 1, minHeight: '60vh', padding: '8rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(to bottom, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.95) 100%)' }}>
           <div className="glass-card" style={{
             maxWidth: '48rem', width: '100%', textAlign: 'center',
             padding: 'clamp(2rem, 5vw, 5rem)', borderRadius: '3rem',
