@@ -44,7 +44,7 @@ export default function Navbar() {
       </Link>
 
       {/* Nav Links */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+      <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
         <Link to="/book" style={linkStyle('/book')}>Book Ticket</Link>
         <Link to="/status" style={linkStyle('/status')}>Check PNR</Link>
         <Link to="/alternatives" style={linkStyle('/alternatives')}>Smart Routes</Link>

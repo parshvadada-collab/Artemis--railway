@@ -269,3 +269,31 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   background: rgba(139,92,246,0.15); color: var(--accent-2);
   padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700;
 }
+
+/* ── Mobile Responsiveness ────────────────────────────────── */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .mobile-col {
+    flex-direction: column !important;
+  }
+
+  .mobile-full-btn {
+    width: 100% !important;
+  }
+
+  .nav-inner {
+    padding: 0.5rem 1rem !important;
+  }
+
+  h1.hero-title {
+    font-size: 2.5rem !important;
+  }
+
+  p.hero-subtitle {
+    font-size: 1rem !important;
+    padding: 0 1rem;
+  }
+}

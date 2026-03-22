@@ -207,7 +207,7 @@ const LandingPage = () => {
 
 
       {/* Navigation */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 50, padding: '1rem 1.5rem' }}>
+      <nav className="nav-inner" style={{ position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 50, padding: '1rem 1.5rem' }}>
         <div className="glass-card" style={{
           maxWidth: '1280px', margin: '0 auto',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -226,7 +226,7 @@ const LandingPage = () => {
             <span style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.05em' }}>RailWise</span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
             <button onClick={() => navigate('/book')} style={{ fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255,255,255,0.8)', transition: 'color 0.2s' }}
               onMouseOver={e => e.target.style.color = '#D4AF37'} onMouseOut={e => e.target.style.color = 'rgba(255,255,255,0.8)'}>
               Book Ticket
@@ -269,18 +269,18 @@ const LandingPage = () => {
               AI-Powered Travel Intelligence
             </span>
 
-            <h1 style={{ fontSize: 'clamp(3rem, 8vw, 6rem)', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.1, margin: 0 }}>
+            <h1 className="hero-title" style={{ fontSize: 'clamp(3rem, 8vw, 6rem)', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.1, margin: 0 }}>
               The Future of <br />
               <span className="text-gradient">Railway Bookings</span>
             </h1>
 
-            <p style={{ fontSize: '1.25rem', color: 'rgba(209,213,219,1)', maxWidth: '42rem', margin: '0 auto', lineHeight: 1.7 }}>
+            <p className="hero-subtitle" style={{ fontSize: '1.25rem', color: 'rgba(209,213,219,1)', maxWidth: '42rem', margin: '0 auto', lineHeight: 1.7 }}>
               Experience seamless travel with real-time waitlist predictions, smart alternative routing,
               and AI-driven itinerary management — all in one place.
             </p>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', paddingTop: '1rem' }}>
-              <button onClick={() => navigate('/book')} style={{
+            <div className="mobile-col" style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', paddingTop: '1rem', width: '100%' }}>
+              <button className="mobile-full-btn" onClick={() => navigate('/book')} style={{
                 padding: '1rem 2rem', backgroundColor: 'white', color: 'black',
                 fontWeight: 700, borderRadius: '1rem', fontSize: '1rem',
                 transition: 'all 0.2s', transform: 'scale(1)'
@@ -289,7 +289,7 @@ const LandingPage = () => {
                 onMouseOut={e => { e.target.style.backgroundColor = 'white'; e.target.style.transform = 'scale(1)'; }}>
                 Book a Ticket
               </button>
-              <button onClick={() => navigate('/status')} className="glass-card" style={{
+              <button onClick={() => navigate('/status')} className="glass-card mobile-full-btn" style={{
                 padding: '1rem 2rem', color: 'white',
                 fontWeight: 700, borderRadius: '1rem', fontSize: '1rem',
                 transition: 'all 0.2s', border: '1px solid rgba(255,255,255,0.2)'
