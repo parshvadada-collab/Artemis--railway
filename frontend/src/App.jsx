@@ -7,6 +7,7 @@ import BookTicket from './pages/BookTicket.jsx';
 import CheckStatus from './pages/CheckStatus.jsx';
 import Alternatives from './pages/Alternatives.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import Login from './pages/Login.jsx';
 
 const AppLayout = () => {
     const location = useLocation();
@@ -37,7 +38,7 @@ const AppLayout = () => {
         prevPathRef.current = curr;
     }, [location.pathname]);
 
-    const isLanding = location.pathname === '/';
+    const isLanding = location.pathname === '/' || location.pathname === '/login';
 
     return (
         <>
@@ -46,6 +47,7 @@ const AppLayout = () => {
             <div className={animClass} key={location.pathname}>
                 <Routes location={location}>
                     <Route path="/"             element={<LandingPage />} />
+                    <Route path="/login"        element={<Login />} />
                     <Route path="/book"         element={<BookTicket />} />
                     <Route path="/status"       element={<CheckStatus />} />
                     <Route path="/alternatives" element={<Alternatives />} />

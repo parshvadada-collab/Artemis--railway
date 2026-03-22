@@ -48,19 +48,6 @@ export default function Navbar() {
         <Link to="/book" style={linkStyle('/book')}>Book Ticket</Link>
         <Link to="/status" style={linkStyle('/status')}>Check PNR</Link>
         <Link to="/alternatives" style={linkStyle('/alternatives')}>Smart Routes</Link>
-        <Link to="/admin" style={{
-          color: path === '/admin' ? '#0A0A0A' : GOLD,
-          background: path === '/admin' ? GOLD : 'transparent',
-          textDecoration: 'none',
-          fontWeight: 700,
-          fontSize: '0.875rem',
-          border: `1px solid ${GOLD}`,
-          padding: '0.375rem 1rem',
-          borderRadius: '0.5rem',
-          transition: 'all 0.2s',
-        }}>
-          Operator Dashboard
-        </Link>
       </div>
     </nav>
   );

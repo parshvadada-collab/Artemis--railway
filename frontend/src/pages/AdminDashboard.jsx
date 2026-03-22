@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
@@ -22,8 +23,13 @@ export default function AdminDashboard() {
   const [trains, setTrains] = useState([]);
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (!sessionStorage.getItem('isAdmin')) {
+      navigate('/login');
+      return;
+    }
     async function fetchData() {
       try {
         const [stRes, rtRes, trRes, rcRes] = await Promise.all([

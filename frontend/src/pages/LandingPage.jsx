@@ -241,7 +241,7 @@ const LandingPage = () => {
             </button>
           </div>
 
-          <button onClick={() => navigate('/admin')} style={{
+          <button onClick={() => navigate('/login')} style={{
             backgroundColor: 'rgba(255,255,255,0.1)', color: 'white',
             padding: '0.5rem 1.25rem', borderRadius: '0.75rem',
             fontSize: '0.875rem', fontWeight: 600,
