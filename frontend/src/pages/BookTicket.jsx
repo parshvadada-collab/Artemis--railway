@@ -134,6 +134,12 @@ export default function BookTicket() {
     setTrains([]); setSearched(false); setSelectedTrain(null);
   };
 
+  useEffect(() => {
+    if (searched && journey.source && journey.destination && journey.date) {
+      searchTrainsObj(journey);
+    }
+  }, [journey.class, journey.quota]);
+
   const searchTrainsObj = async (jrn) => {
     if (!jrn.source || !jrn.destination || !jrn.date) {
       setError('Please fill source, destination and date'); return;
@@ -145,7 +151,7 @@ export default function BookTicket() {
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/trains/search`,
-        { params: { source: jrn.source, destination: jrn.destination, date: jrn.date } }
+        { params: { source: jrn.source, destination: jrn.destination, date: jrn.date, class: jrn.class, quota: jrn.quota } }
       );
       const allTrains = res.data.trains || [];
       const filtered = filterDepartedTrains(allTrains, jrn.date);
