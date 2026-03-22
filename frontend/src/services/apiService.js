@@ -2,6 +2,17 @@ import axios from 'axios';
 
 const BASE = `${import.meta.env.VITE_API_URL || ''}/api`;
 
+// ── IST timezone utility ─────────────────────────────────────────────────────
+const getTodayIST = () => {
+    const nowUTC = new Date();
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const nowIST = new Date(nowUTC.getTime() + IST_OFFSET_MS);
+    const y = nowIST.getUTCFullYear();
+    const m = String(nowIST.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(nowIST.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
+
 // ── Auth token management ────────────────────────────────────────────────────
 let _token = localStorage.getItem('railwise_token') || null;
 
@@ -25,17 +36,14 @@ export async function login(username, password) {
 }
 
 // ── Trains ────────────────────────────────────────────────────────────────────
-export async function searchTrains({ source, destination }) {
-    // Uses the alternatives endpoint for a "same date" direct search
-    const res = await axios.get(`${BASE}/alternatives`, {
-        params: {
-            source,
-            destination,
-            date: new Date().toISOString().split('T')[0],
-            preference: 'fastest',
-        },
+// ✅ FIXED: now calls /trains/search, not /alternatives
+// ✅ FIXED: date uses IST, not raw new Date() which could be wrong timezone
+export async function searchTrains({ source, destination, date }) {
+    const searchDate = date || getTodayIST();
+    const res = await axios.get(`${BASE}/trains/search`, {
+        params: { source, destination, date: searchDate },
     });
-    return res.data.alternatives || [];
+    return res.data.trains || res.data || [];
 }
 
 // ── Bookings ──────────────────────────────────────────────────────────────────
@@ -73,16 +81,19 @@ export async function getPredictionByPNR(pnr) {
 
 // ── Alternatives ──────────────────────────────────────────────────────────────
 export async function getAlternatives({ source, destination, date, preference }) {
+    const searchDate = date || getTodayIST();
     const res = await axios.get(`${BASE}/alternatives`, {
-        params: { source, destination, date, preference },
+        params: { source, destination, date: searchDate, preference },
     });
     return res.data;
 }
 
 // ── Allocations ───────────────────────────────────────────────────────────────
 export async function triggerReallocation(trainId) {
-    const res = await axios.post(`${BASE}/allocations/reallocate?trainId=${trainId}`, {}, {
-        headers: authHeaders(),
-    });
+    const res = await axios.post(
+        `${BASE}/allocations/reallocate?trainId=${trainId}`,
+        {},
+        { headers: authHeaders() }
+    );
     return res.data;
 }

@@ -22,6 +22,44 @@ const CLASSES = [
   { code: '1A', label: 'AC First Class (1A)', icon: '👑' },
 ];
 
+// ── IST Helpers & Time Formatters ─────────────────────────────────────────
+const getTodayIST = () => {
+  const nowUTC = new Date();
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  const nowIST = new Date(nowUTC.getTime() + IST_OFFSET_MS);
+  const y = nowIST.getUTCFullYear();
+  const mo = String(nowIST.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(nowIST.getUTCDate()).padStart(2, '0');
+  return `${y}-${mo}-${d}`;
+};
+
+const getNowISTMinutes = () => {
+  const nowUTC = new Date();
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  const nowIST = new Date(nowUTC.getTime() + IST_OFFSET_MS);
+  return nowIST.getUTCHours() * 60 + nowIST.getUTCMinutes();
+};
+
+const filterDepartedTrains = (trains, selectedDate) => {
+  if (selectedDate !== getTodayIST()) return trains;
+  const nowMinutes = getNowISTMinutes();
+  return trains.filter(train => {
+    const raw = train.departure_time || '';
+    const timePart = raw.includes('T') ? raw.split('T')[1] : raw;
+    const [h, m] = timePart.split(':').map(Number);
+    return (h * 60 + m) > nowMinutes;
+  });
+};
+
+const formatTime = (raw) => {
+  if (!raw) return '--:--';
+  const timePart = raw.includes('T') ? raw.split('T')[1] : raw;
+  const [h, m] = timePart.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${period}`;
+};
+
 const inputStyle = {
   width: '100%', padding: '0.75rem 1rem',
   background: 'rgba(255,255,255,0.05)',
@@ -57,16 +95,30 @@ export default function BookTicket() {
   };
 
   const searchTrains = async () => {
-    if (!journey.source || !journey.destination || !journey.date) { setError('Please fill source, destination and date'); return; }
-    if (journey.source === journey.destination) { setError('Source and destination cannot be same'); return; }
+    if (!journey.source || !journey.destination || !journey.date) {
+      setError('Please fill source, destination and date'); return;
+    }
+    if (journey.source === journey.destination) {
+      setError('Source and destination cannot be same'); return;
+    }
     setError(''); setLoading(true); setSearched(false);
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/trains/search`,
-        { params: { source: journey.source, destination: journey.destination, date: journey.date } });
-      setTrains(res.data.trains || []);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/trains/search`,
+        { params: { source: journey.source, destination: journey.destination, date: journey.date } }
+      );
+      const allTrains = res.data.trains || [];
+      const filtered = filterDepartedTrains(allTrains, journey.date);
+      setTrains(filtered);
+      if (filtered.length === 0 && allTrains.length > 0) {
+        setError('All trains for today have already departed. Please select a future date.');
+      }
       setSearched(true);
-    } catch { setTrains([]); setSearched(true); }
-    finally { setLoading(false); }
+    } catch {
+      setTrains([]); setSearched(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const selectTrain = (train) => { setSelectedTrain(train); setShowPassenger(true); setError(''); };
@@ -144,7 +196,7 @@ export default function BookTicket() {
             <div style={{ flex: '1 1 140px' }}>
               <label style={labelStyle}>Date</label>
               <input type="date" value={journey.date}
-                min={new Date().toISOString().split('T')[0]}
+                min={getTodayIST()}
                 onChange={e => setJourney({ ...journey, date: e.target.value })}
                 style={{ ...inputStyle, colorScheme: 'dark' }} />
             </div>
@@ -216,11 +268,11 @@ export default function BookTicket() {
 
             {/* Time Bar */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
-              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'white' }}>{train.departure_time?.slice(11, 16) || '--:--'}</span>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'white' }}>{formatTime(train.departure_time)}</span>
               <div style={{ flex: 1, height: '1px', background: BORDER, position: 'relative' }}>
                 <span style={{ position: 'absolute', top: '-0.75rem', left: '50%', transform: 'translateX(-50%)' }}>🚂</span>
               </div>
-              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'white' }}>{train.arrival_time?.slice(11, 16) || '--:--'}</span>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'white' }}>{formatTime(train.arrival_time)}</span>
             </div>
 
             {/* Fares */}
