@@ -6,21 +6,12 @@ services:
     rootDir: backend
     buildCommand: npm install
     startCommand: npm start
-    plan: free # Change to starter/standard for production
+    plan: free
     envVars:
       - key: PORT
         value: 5000
-      - key: DB_HOST
-        value: "ADD_YOUR_MYSQL_HOST_HERE" # E.g., from Aiven / TiDB / PlanetScale
-      - key: DB_USER
-        value: "ADD_YOUR_MYSQL_USER_HERE"
-      - key: DB_PASSWORD
-        value: "ADD_YOUR_MYSQL_PASSWORD_HERE"
-      - key: DB_NAME
-        value: "ADD_YOUR_MYSQL_DB_NAME_HERE"
-      - key: DB_PORT
-        value: "3306"
-      # The ML server URL will be automatically populated once the ML service spins up
+      - key: DATABASE_URL
+        sync: false # Set this manually in Render dashboard from your DB URL
       - key: ML_SERVICE_URL
         fromService:
           type: web
@@ -38,26 +29,21 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.0"
-      - key: PORT
-        value: 5001
 
-  # 3. VITE REACT FRONTEND
-  - type: web # Using a 'web' service instead of 'static' allows serving Vite apps dynamically if you need SPA fallbacks easily, though static is faster. Static is preferred for Render React apps.
+  # 3. VITE REACT FRONTEND (STATIC)
+  - type: static
     name: railwise-frontend
-    env: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
-    plan: free
     envVars:
-      # Automatically map the backend URL so the frontend knows where to fetch data
       - key: VITE_API_URL
         fromService:
           type: web
           name: railwise-backend
           envVarKey: RENDER_EXTERNAL_URL
     routes:
-      # Add this rule so React Router properly handles client-side routing on Render
       - type: rewrite
         source: /*
         destination: /index.html
+
