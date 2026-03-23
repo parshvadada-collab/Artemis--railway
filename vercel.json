@@ -4,7 +4,7 @@
   "outputDirectory": "frontend/dist",
   "framework": null,
   "env": {
-    "VITE_API_URL": "https://railwise-backend.onrender.com"
+    "VITE_API_URL": "https://artemis-railway.onrender.com"
   },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
