@@ -7,10 +7,10 @@ router.get('/stats', async (req, res) => {
     try {
         const [[stats]] = await pool.query(`
             SELECT 
-                COUNT(*) as totalBookings,
-                SUM(CASE WHEN b.status = 'confirmed' THEN 1 ELSE 0 END) as confirmedCount,
-                SUM(CASE WHEN b.status = 'waitlisted' THEN 1 ELSE 0 END) as waitlistedCount,
-                SUM(CASE WHEN b.status = 'cancelled' THEN 1 ELSE 0 END) as cancelledCount,
+                COUNT(*) as "totalBookings",
+                SUM(CASE WHEN b.status = 'confirmed' THEN 1 ELSE 0 END) as "confirmedCount",
+                SUM(CASE WHEN b.status = 'waitlisted' THEN 1 ELSE 0 END) as "waitlistedCount",
+                SUM(CASE WHEN b.status = 'cancelled' THEN 1 ELSE 0 END) as "cancelledCount",
                 SUM(
                     CASE WHEN b.status != 'cancelled' THEN 
                         CASE s.class 
@@ -21,7 +21,7 @@ router.get('/stats', async (req, res) => {
                             ELSE 0 
                         END
                     ELSE 0 END
-                ) as totalRevenue
+                ) as "totalRevenue"
             FROM bookings b
             JOIN trains t ON b.train_id = t.id
             LEFT JOIN seats s ON b.seat_id = s.id
@@ -42,12 +42,12 @@ router.get('/routes', async (req, res) => {
     try {
         const [routes] = await pool.query(`
             SELECT 
-                CONCAT(t.source, ' ?? ', t.destination) AS routeName,
-                COUNT(b.id) AS bookingCount
+                CONCAT(t.source, ' → ', t.destination) AS "routeName",
+                COUNT(b.id) AS "bookingCount"
             FROM bookings b
             JOIN trains t ON b.train_id = t.id
             GROUP BY t.source, t.destination
-            ORDER BY bookingCount DESC
+            ORDER BY "bookingCount" DESC
             LIMIT 5
         `);
         res.json(routes);
@@ -61,11 +61,11 @@ router.get('/trains', async (req, res) => {
     try {
         const [trains] = await pool.query(`
             SELECT 
-                t.train_number as trainNumber,
-                t.train_name as trainName,
-                t.total_seats as totalSeats,
-                COUNT(s.id) as availableSeats,
-                ROUND(((t.total_seats - COUNT(s.id)) / t.total_seats) * 100, 2) as utilization
+                t.train_number as "trainNumber",
+                t.train_name as "trainName",
+                t.total_seats as "totalSeats",
+                COUNT(s.id) as "availableSeats",
+                ROUND(((t.total_seats - COUNT(s.id))::decimal / t.total_seats) * 100, 2) as utilization
             FROM trains t
             LEFT JOIN seats s ON s.train_id = t.id AND s.is_available = TRUE
             GROUP BY t.id
@@ -87,10 +87,10 @@ router.get('/recent', async (req, res) => {
         const [bookings] = await pool.query(`
             SELECT 
                 b.pnr_code as pnr,
-                p.name as passengerName,
+                p.name as "passengerName",
                 b.status as status,
-                t.train_name as trainName,
-                CONCAT(t.source, ' ?? ', t.destination) as route,
+                t.train_name as "trainName",
+                CONCAT(t.source, ' → ', t.destination) as route,
                 s.class as class
             FROM bookings b
             JOIN passengers p ON b.passenger_id = p.id
@@ -110,14 +110,14 @@ router.get('/waitlist', async (req, res) => {
     try {
         const [waitlist] = await pool.query(`
             SELECT 
-                t.train_name as trainName,
-                t.train_number as trainNumber,
-                COUNT(w.id) as waitlistCount
+                t.train_name as "trainName",
+                t.train_number as "trainNumber",
+                COUNT(w.id) as "waitlistCount"
             FROM waitlist w
             JOIN bookings b ON w.booking_id = b.id
             JOIN trains t ON b.train_id = t.id
             GROUP BY t.id
-            ORDER BY waitlistCount DESC
+            ORDER BY "waitlistCount" DESC
         `);
         res.json(waitlist);
     } catch (error) {
