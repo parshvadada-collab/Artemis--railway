@@ -20,7 +20,7 @@ Built for the **Datathon 2026** hackathon by Team **Artemis**.
 
 ## 🖥️ Live Demo
 
-🔗 **[artemis-railway-copy-production.up.railway.app](https://artemis-railway-copy-production.up.railway.app)**
+🔗 **[https://artemis-railway.vercel.app ](https://artemis-railway.vercel.app/)**
 
 ---
 
