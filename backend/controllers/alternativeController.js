@@ -24,7 +24,7 @@ async function getAlternatives(req, res, next) {
         const maxDateStr = formatDate(maxDate);
 
         // --- Direct routes (same source→destination, ±2 days) ---
-        const directResult = await pool.query(
+        const [directRoutes] = await pool.query(
             `SELECT t.id, t.train_number, t.train_name, t.source, t.destination,
                 t.departure_time, t.arrival_time, t.distance_km,
                 (SELECT s.class FROM seats s
@@ -38,10 +38,9 @@ async function getAlternatives(req, res, next) {
             ORDER BY t.departure_time ASC`,
             [source, destination, minDateStr, maxDateStr]
         );
-        const directRoutes = directResult.rows;
 
         // --- Multi-leg routes: leg1 = source → intermediate ---
-        const leg1Result = await pool.query(
+        const [leg1Routes] = await pool.query(
             `SELECT t.id, t.train_number, t.source, t.destination AS intermediate,
                 t.departure_time, t.arrival_time, t.distance_km,
                 (SELECT s.class FROM seats s
@@ -53,7 +52,6 @@ async function getAlternatives(req, res, next) {
               AND (t.departure_time AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata')::date BETWEEN $3::date AND $4::date`,
             [source, destination, minDateStr, maxDateStr]
         );
-        const leg1Routes = leg1Result.rows;
 
         const alternatives = [];
 
@@ -84,7 +82,7 @@ async function getAlternatives(req, res, next) {
             const intermediate = l1.intermediate;
             const arrivalISO = new Date(l1.arrival_time).toISOString();
 
-            const leg2Result = await pool.query(
+            const [leg2Routes] = await pool.query(
                 `SELECT t.id, t.train_number, t.source, t.destination,
                     t.departure_time, t.arrival_time, t.distance_km,
                     (SELECT s.class FROM seats s
@@ -98,7 +96,7 @@ async function getAlternatives(req, res, next) {
                 [intermediate, destination, arrivalISO]
             );
 
-            for (const l2 of leg2Result.rows) {
+            for (const l2 of leg2Routes) {
                 if (parseInt(l2.avail_seats, 10) === 0) continue;
                 const fare1 = calcFare(l1.distance_km, l1.class_available);
                 const fare2 = calcFare(l2.distance_km, l2.class_available);
