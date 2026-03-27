@@ -1,243 +1,181 @@
-# 🚂 RailWise — Intelligent Railway Booking System
+# RailWise - Intelligent Railway Booking System
 
-> **AI-powered railway ticket management with real-time waitlist prediction, dynamic seat allocation, and smart route alternatives.**
+AI-powered railway ticket management with real-time waitlist prediction, dynamic seat allocation, and smart route alternatives.
 
-Built for the **Datathon 2026** hackathon by Team **Artemis**.
+Built for the Datathon 2026 hackathon by Team Artemis.
 
----
+## Features
 
-## ✨ Features
+- Booking portal for train search and ticket booking
+- Waitlist prediction by PNR using a separate ML service
+- Dynamic seat reallocation when cancellations happen
+- Smart route alternatives including multi-leg journeys
+- Operator dashboard with booking and utilization stats
 
-| Module | Description |
-|---|---|
-| 🎫 **Booking Portal** | Search trains, select class, book tickets — confirmed or waitlisted |
-| 🧠 **Waitlist Prediction** | ML model predicts % probability of waitlist confirmation by PNR |
-| 🔄 **Dynamic Seat Allocation** | Auto-reallocates seats on cancellation using transaction-safe logic |
-| 🗺️ **Smart Route Alternatives** | Multi-leg routing when direct trains are unavailable |
-| 📊 **Operator Dashboard** | Real-time stats, booking distribution charts, seat utilization |
-
----
-
-## 🖥️ Live Demo
-
-🔗 **[https://artemis-railway.vercel.app ](https://artemis-railway.vercel.app/)**
-
----
-
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
-- **React 18** + **Vite**
-- **React Router v6** — client-side routing with CSS page transitions
-- **Recharts** — booking distribution & utilization charts
-- **Pure CSS animations** — moving train parallax, flying birds, gold cursor follower
-- **Glassmorphism UI** — dark luxury theme (`#0A0A0A` + `#D4AF37` gold)
+
+- React 18 + Vite
+- React Router
+- Recharts
 
 ### Backend
-- **Node.js** + **Express**
-- **MySQL2** — relational database with connection pooling
-- **Helmet** + **CORS** + **Rate Limiting** — production-grade security
-- **node-cron** — scheduled seat reallocation every 15 minutes
 
-### ML / Prediction
-- Rule-based + feature-weighted model for waitlist confirmation probability
-- Features: waitlist position, class, route demand, day-of-week, season
+- Node.js + Express
+- PostgreSQL runtime database
+- `pg` with a MySQL-style compatibility adapter in `backend/utils/db.js`
+- Helmet, CORS, rate limiting, cron-based reallocation
 
-### Deployment
-- **Railway.app** — unified backend + frontend in one service
-- **GitHub Actions** — auto-deploy on push to `main`
+### ML
 
----
+- Python prediction service
+- Pretrained waitlist confirmation model in `ml/models/waitlistPredictor.pkl`
 
-## 📁 Project Structure
+## Important Database Note
 
-```
-railway-ticket-management/
-├── backend/
-│   ├── app.js                  # Express app (serves API + frontend dist)
-│   ├── server.js               # Entry point, PORT binding
-│   ├── routes/
-│   │   ├── bookingRoutes.js
-│   │   ├── trainRoutes.js
-│   │   ├── predictionRoutes.js
-│   │   ├── alternativeRoutes.js
-│   │   ├── allocationRoutes.js
-│   │   └── adminRoutes.js
-│   ├── controllers/
-│   ├── middlewares/
-│   └── utils/
-│       ├── db.js               # MySQL connection pool
-│       └── scheduler.js        # Cron job for seat reallocation
-├── frontend/
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── LandingPage.jsx      # Hero with moving train + birds
-│   │   │   ├── BookTicket.jsx       # Train search + booking flow
-│   │   │   ├── CheckStatus.jsx      # PNR waitlist prediction
-│   │   │   ├── Alternatives.jsx     # Smart multi-leg routing
-│   │   │   └── AdminDashboard.jsx   # Operator stats & charts
-│   │   ├── components/
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── CursorFollower.jsx   # Gold cursor dot + ring
-│   │   │   └── PageTransition.jsx
-│   │   ├── App.jsx                  # Routes + CSS page transitions
-│   │   └── index.css                # Global design system
-│   └── public/
-│       └── train-asset-1.jpeg       # Hero background image
-├── railway.json                # Railway deployment config
-├── Procfile                    # Fallback process definition
-└── README.md
+The current runtime app uses PostgreSQL, not MySQL.
+
+- The backend database layer is implemented in `backend/utils/db.js` using `pg`
+- Some older scripts and dependencies still reference MySQL from an earlier iteration of the project
+- For local setup and judging, treat PostgreSQL as the source of truth for the running app
+
+## Project Structure
+
+```text
+backend/    Express API and database layer
+frontend/   React client
+ml/         Python prediction service and trained model
+scripts/    Database bootstrap and seed helpers
 ```
 
----
-
-## 🚀 Local Setup
+## Local Setup
 
 ### Prerequisites
+
 - Node.js 18+
-- MySQL 8+
+- PostgreSQL 14+
+- Python 3.10+ for the ML service
 
 ### 1. Clone the repo
+
 ```bash
 git clone https://github.com/parshvadada-collab/Artemis--railway.git
 cd Artemis--railway
 ```
 
-### 2. Set up environment variables
-Create a `.env` file in the root:
+### 2. Create `.env`
+
+Use the root `.env.example` as the template.
+
+Example:
+
 ```env
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/railway_db
 DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
+DB_PORT=5432
+DB_USER=postgres
 DB_PASSWORD=your_password
 DB_NAME=railway_db
 JWT_SECRET=your_jwt_secret
 PORT=5000
+ML_SERVICE_URL=http://localhost:5002
 ```
 
-### 3. Set up the database
+### 3. Create and seed the database
+
 ```bash
-mysql -u root -p < scripts/populateDB.js
-# or run the migration manually
-node backend/scripts/migration.js
+createdb railway_db
+node scripts/populateDB.js
 ```
 
-### 4. Start backend
+Note:
+
+- `scripts/populateDB.js` is the PostgreSQL-oriented bootstrap script used by the current app flow
+- Some older migration and seed scripts in the repo are MySQL-era leftovers and are not the primary local setup path
+
+### 4. Start the backend
+
 ```bash
 cd backend
 npm install
 npm run dev
-# Runs on http://localhost:5000
 ```
 
-### 5. Start frontend
+Backend runs on `http://localhost:5000`.
+
+### 5. Start the frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
-# Runs on http://localhost:3000
 ```
 
----
+Frontend runs on the Vite dev server.
 
-## 🌐 Deployment on Railway
+### 6. Start the ML service
 
-### One-service deployment (Frontend + Backend together)
-
-The `railway.json` configures Railway to:
-1. Build the React frontend (`npm run build`)
-2. Install backend dependencies
-3. Serve everything from one Express server
-
-```json
-{
-  "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "cd frontend && npm install && VITE_API_URL='' npm run build && cd ../backend && npm install"
-  },
-  "deploy": {
-    "startCommand": "cd backend && node server.js"
-  }
-}
+```bash
+cd ml
+pip install -r requirements.txt
+python predict_server.py
 ```
 
-### Required Environment Variables (Railway → Variables tab)
+ML service runs on `http://localhost:5002`.
 
-| Variable | Value |
-|---|---|
-| `DB_HOST` | `${{MySQL.MYSQLHOST}}` |
-| `DB_USER` | `${{MySQL.MYSQLUSER}}` |
-| `DB_PASSWORD` | `${{MySQL.MYSQLPASSWORD}}` |
-| `DB_NAME` | `${{MySQL.MYSQLDATABASE}}` |
-| `DB_PORT` | `${{MySQL.MYSQLPORT}}` |
-| `NODE_ENV` | `production` |
-| `PORT` | `8080` |
-| `JWT_SECRET` | `your-secure-secret` |
-
-> Add a **MySQL** service in Railway → it auto-injects the `MYSQL*` variables.
-
----
-
-## 📡 API Endpoints
+## Core API Endpoints
 
 ### Trains
-```
-GET  /api/trains/search?source=Mumbai&destination=Delhi&date=2026-03-20
+
+```text
+GET /api/trains/search?source=Mumbai&destination=Delhi&date=2026-03-20
 ```
 
 ### Bookings
-```
+
+```text
 POST /api/bookings
-Body: { name, age, contact, train_id, seat_class }
-
-GET  /api/bookings/:pnr
+GET /api/bookings/:pnr
 ```
 
-### Waitlist Prediction
-```
-GET  /api/predictions/:pnr
-Response: { confirmation_probability, status, confidence, label }
+### Predictions
+
+```text
+GET /api/predictions/:pnr
 ```
 
-### Smart Alternatives
-```
-GET  /api/alternatives?source=Mumbai&destination=Delhi&date=2026-03-20&preference=fastest
+### Alternatives
+
+```text
+GET /api/alternatives?source=Mumbai&destination=Delhi&date=2026-03-20&preference=fastest
 ```
 
 ### Admin
-```
-GET  /api/admin/stats
-GET  /api/admin/routes
-GET  /api/admin/trains
-GET  /api/admin/recent
-GET  /api/admin/waitlist
-```
 
-### Seat Allocation
-```
-POST /api/allocations/reallocate
-POST /api/allocations/cancel/:bookingId
+```text
+GET /api/admin/stats
+GET /api/admin/routes
+GET /api/admin/trains
+GET /api/admin/recent
+GET /api/admin/waitlist
 ```
 
----
+## Deployment Notes
 
-## 🎨 UI Highlights
+If deploying on Railway, provision PostgreSQL for the runtime database and set:
 
-- **Moving train parallax** — hero background pans horizontally (40s CSS animation)
-- **Flying gold birds** — 6 SVG birds at varying speeds & depths over the hero
-- **Custom gold cursor** — snappy dot + lagging ring with hover expand (`requestAnimationFrame` lerp)
-- **Page transitions** — CSS keyframe animations (slide-up, zoom, blur) on every route change
-- **Glassmorphism cards** — `rgba(255,255,255,0.04)` + `backdrop-filter: blur`
-- **Circular probability indicator** — animated SVG ring for PNR waitlist status
+- `DATABASE_URL`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_NAME`
+- `JWT_SECRET`
+- `ML_SERVICE_URL`
+- `NODE_ENV`
+- `PORT`
 
----
+## License
 
-## 👥 Team Artemis
-
-Built with ❤️ for **Datathon 2026**
-
----
-
-## 📄 License
-
-MIT — free to use, modify, and distribute.
+MIT

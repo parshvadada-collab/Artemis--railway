@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../utils/db');
+const { authMiddleware, requireRole } = require('../middlewares/authMiddleware');
+
+router.use(authMiddleware, requireRole('admin'));
 
 // GET /api/admin/stats — returns total bookings, confirmed count, waitlisted count, cancelled count, total revenue
 router.get('/stats', async (req, res) => {

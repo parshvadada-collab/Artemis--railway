@@ -42,9 +42,18 @@ app.post('/api/auth/login', (req, res) => {
     const { username, password } = req.body;
     if (!username || !password)
         return res.status(400).json({ error: 'username and password required' });
+
+    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const isAdmin = username === adminUsername && password === adminPassword;
+
     const { signToken } = require('./middlewares/authMiddleware');
-    const token = signToken({ username, role: 'user' });
-    return res.json({ token, expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
+    const token = signToken({ username, role: isAdmin ? 'admin' : 'user' });
+    return res.json({
+        token,
+        role: isAdmin ? 'admin' : 'user',
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    });
 });
 
 // ── API Routes ────────────────────────────────────────────────────────────────
