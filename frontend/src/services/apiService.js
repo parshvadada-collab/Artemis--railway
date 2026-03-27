@@ -97,3 +97,8 @@ export async function triggerReallocation(trainId) {
     );
     return res.data;
 }
+
+export async function sendChatMessage(message) {
+    const res = await axios.post(`${BASE}/chat`, { message });
+    return res.data;
+}

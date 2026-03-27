@@ -14,6 +14,7 @@ const allocationRoutes = require('./routes/allocationRoutes');
 const alternativeRoutes = require('./routes/alternativeRoutes');
 const trainRoutes = require('./routes/trainRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 const { errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
@@ -63,6 +64,7 @@ app.use('/api/allocations', allocationRoutes);
 app.use('/api/alternatives', alternativeRoutes);
 app.use('/api/trains', trainRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/chat', chatRoutes);
 
 // ── Serve React frontend (built files) ───────────────────────────────────────
 const distPath = path.join(__dirname, '../frontend/dist');
