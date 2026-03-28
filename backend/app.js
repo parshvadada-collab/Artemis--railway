@@ -14,6 +14,7 @@ const allocationRoutes = require('./routes/allocationRoutes');
 const alternativeRoutes = require('./routes/alternativeRoutes');
 const trainRoutes = require('./routes/trainRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 const { errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
@@ -42,9 +43,18 @@ app.post('/api/auth/login', (req, res) => {
     const { username, password } = req.body;
     if (!username || !password)
         return res.status(400).json({ error: 'username and password required' });
+
+    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const isAdmin = username === adminUsername && password === adminPassword;
+
     const { signToken } = require('./middlewares/authMiddleware');
-    const token = signToken({ username, role: 'user' });
-    return res.json({ token, expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
+    const token = signToken({ username, role: isAdmin ? 'admin' : 'user' });
+    return res.json({
+        token,
+        role: isAdmin ? 'admin' : 'user',
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    });
 });
 
 // ── API Routes ────────────────────────────────────────────────────────────────
@@ -54,6 +64,7 @@ app.use('/api/allocations', allocationRoutes);
 app.use('/api/alternatives', alternativeRoutes);
 app.use('/api/trains', trainRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/chat', chatRoutes);
 
 // ── Serve React frontend (built files) ───────────────────────────────────────
 const distPath = path.join(__dirname, '../frontend/dist');

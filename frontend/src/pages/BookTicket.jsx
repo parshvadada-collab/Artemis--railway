@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import ConfidenceHeatmap from '../components/ConfidenceHeatmap';
 
 const GOLD = '#D4AF37';
 const BG = '#0A0A0A';
@@ -23,6 +24,32 @@ const CSS = `
   .animate-up { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
   .train-card { animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
   .train-card:hover { border-color: ${GOLD} !important; background: rgba(255,255,255,0.06) !important; transform: translateY(-3px); }
+  .confidence-score {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .confidence-score__tooltip {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.6rem);
+    width: min(19rem, 82vw);
+    padding: 0.85rem 0.95rem;
+    border-radius: 0.95rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(10,10,10,0.96);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.35);
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 10;
+  }
+  .confidence-score:hover .confidence-score__tooltip {
+    opacity: 1;
+    transform: translateY(0);
+  }
 `;
 
 const STATIONS = [
@@ -99,6 +126,95 @@ const labelStyle = {
   letterSpacing: '0.1em', textTransform: 'uppercase',
 };
 
+const getConfidenceColors = (probability) => {
+  if (probability == null) {
+    return {
+      color: 'rgba(255,255,255,0.7)',
+      bg: 'rgba(255,255,255,0.08)',
+      border: 'rgba(255,255,255,0.14)',
+    };
+  }
+
+  if (probability >= 0.7) {
+    return {
+      color: '#4ade80',
+      bg: 'rgba(74,222,128,0.12)',
+      border: 'rgba(74,222,128,0.28)',
+    };
+  }
+
+  if (probability >= 0.4) {
+    return {
+      color: '#facc15',
+      bg: 'rgba(250,204,21,0.12)',
+      border: 'rgba(250,204,21,0.28)',
+    };
+  }
+
+  return {
+    color: '#f87171',
+    bg: 'rgba(248,113,113,0.12)',
+    border: 'rgba(248,113,113,0.28)',
+  };
+};
+
+const formatConfidenceProbability = (probability) => {
+  if (probability == null) return '—';
+  return `${Math.round(probability * 100)}%`;
+};
+
+function ConfidenceScoreBadge({ score }) {
+  const colors = getConfidenceColors(score?.confirmation_probability ?? null);
+
+  return (
+    <div className="confidence-score">
+      <span style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.45rem',
+        padding: '0.4rem 0.7rem',
+        borderRadius: '999px',
+        fontSize: '0.72rem',
+        fontWeight: 800,
+        letterSpacing: '0.05em',
+        background: colors.bg,
+        border: `1px solid ${colors.border}`,
+        color: colors.color,
+      }}>
+        RailWise Confidence
+        <strong style={{ color: colors.color }}>{formatConfidenceProbability(score?.confirmation_probability ?? null)}</strong>
+      </span>
+
+      <div className="confidence-score__tooltip">
+        <div style={{ color: GOLD, fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.55rem' }}>
+          RailWise Confidence Breakdown
+        </div>
+        {score ? (
+          <>
+            <div style={{ color: 'white', fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.35rem' }}>
+              {formatConfidenceProbability(score.confirmation_probability)} projected confirmation chance
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.78rem', lineHeight: 1.45, marginBottom: '0.65rem' }}>
+              Estimated waitlist #{score.waitlist_position_estimate} · {score.ml_features?.days_to_departure ?? '--'} days to departure · {score.confidence || 'unavailable'} confidence band
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+              {(score.factors || []).map((factor, index) => (
+                <div key={`${factor.label}-${index}`} style={{ fontSize: '0.76rem', color: 'rgba(255,255,255,0.76)', lineHeight: 1.45 }}>
+                  <strong style={{ color: 'white' }}>{factor.label}:</strong> {factor.detail}
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.78rem', lineHeight: 1.5 }}>
+            Confidence scoring is unavailable for this train right now.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function BookTicket() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -110,6 +226,7 @@ export default function BookTicket() {
   const [error, setError] = useState('');
   const [selectedTrain, setSelectedTrain] = useState(null);
   const [showPassenger, setShowPassenger] = useState(false);
+  const [prebookingWindow, setPrebookingWindow] = useState([]);
 
   const [journey, setJourney] = useState({
     source: searchParams.get('source') || '',
@@ -147,7 +264,7 @@ export default function BookTicket() {
     if (jrn.source === jrn.destination) {
       setError('Source and destination cannot be same'); return;
     }
-    setError(''); setLoading(true); setSearched(false);
+    setError(''); setLoading(true); setSearched(false); setSelectedTrain(null); setShowPassenger(false);
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/trains/search`,
@@ -169,6 +286,12 @@ export default function BookTicket() {
 
   const searchTrains = () => searchTrainsObj(journey);
 
+  const handleConfidenceDateSelect = (date) => {
+    const updatedJourney = { ...journey, date };
+    setJourney(updatedJourney);
+    searchTrainsObj(updatedJourney);
+  };
+
   const selectTrain = (train) => { setSelectedTrain(train); setShowPassenger(true); setError(''); };
 
   const handleBook = async () => {
@@ -189,6 +312,12 @@ export default function BookTicket() {
 
   if (result) return <SuccessCard result={result} passenger={passenger} navigate={navigate}
     onReset={() => { setResult(null); setSelectedTrain(null); setShowPassenger(false); setSearched(false); setTrains([]); }} />;
+
+  const selectedConfidenceDay = prebookingWindow.find((day) => day.date === journey.date) || null;
+  const trainConfidenceById = (selectedConfidenceDay?.trains || []).reduce((acc, train) => {
+    acc[train.train_id] = train;
+    return acc;
+  }, {});
 
   return (
     <>
@@ -268,6 +397,17 @@ export default function BookTicket() {
 
           {error && <p style={{ color: '#f87171', fontSize: '0.85rem', marginTop: '1rem', marginBottom: 0 }}>⚠ {error}</p>}
 
+          {journey.source && journey.destination && journey.date && journey.class && (
+            <ConfidenceHeatmap
+              source={journey.source}
+              destination={journey.destination}
+              seatClass={journey.class}
+              baseDate={journey.date}
+              onSelectDate={handleConfidenceDateSelect}
+              onDataLoaded={setPrebookingWindow}
+            />
+          )}
+
           <button onClick={searchTrains} disabled={loading} style={{
             width: '100%', marginTop: '1.5rem', background: loading ? 'rgba(212,175,55,0.4)' : GOLD,
             color: '#0A0A0A', border: 'none', padding: '0.875rem 2.5rem',
@@ -299,7 +439,10 @@ export default function BookTicket() {
         )}
 
         {/* Train Results */}
-        {trains.map((train, i) => (
+        {trains.map((train, i) => {
+          const trainScore = trainConfidenceById[train.id];
+
+          return (
           <div key={train.id} className="train-card" style={{
             animationDelay: `${0.1 + i * 0.05}s`,
             background: CARD, borderRadius: '1.25rem', padding: '1.5rem',
@@ -315,6 +458,7 @@ export default function BookTicket() {
                 padding: '0.125rem 0.5rem', borderRadius: '0.375rem', fontSize: '0.75rem', fontWeight: 700,
                 border: `1px solid ${GOLD_BORDER}`
               }}>{journey.class}</span>
+              <ConfidenceScoreBadge score={trainScore} />
               <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600, marginLeft: 'auto', fontSize: '0.95rem' }}>
                 {train.train_name || 'Express'}
               </span>
@@ -374,7 +518,8 @@ export default function BookTicket() {
               </button>
             </div>
           </div>
-        ))}
+        );
+        })}
 
         {/* Passenger Form */}
         {showPassenger && selectedTrain && (

@@ -1,4 +1,5 @@
 {
+  "description": "RailWise workspace metadata; current runtime backend uses PostgreSQL",
   "dependencies": {
     "dotenv": "^17.3.1",
     "mysql2": "^3.19.1"

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { login, setToken } from '../services/apiService';
 
 const GOLD = '#D4AF37';
 const BG = '#0A0A0A';
@@ -77,7 +78,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     
@@ -87,17 +88,22 @@ export default function Login() {
     }
 
     setLoading(true);
-    // Simulate network delay
-    setTimeout(() => {
-      // Hardcoded validation for assignment simplicity
-      if (username.toLowerCase() === 'admin' && password === 'admin123') {
-        sessionStorage.setItem('isAdmin', 'true');
-        navigate('/admin');
-      } else {
-        setError('Invalid admin credentials. (Hint: admin / admin123)');
+    try {
+      const res = await login(username, password);
+      if (res.role !== 'admin') {
+        setToken(null);
+        setError('This account does not have admin access.');
         setLoading(false);
+        return;
       }
-    }, 800);
+        navigate('/admin');
+    } catch (err) {
+      setToken(null);
+      setError(err?.response?.data?.error || 'Invalid admin credentials.');
+      setLoading(false);
+      return;
+    }
+    setLoading(false);
   };
 
   return (

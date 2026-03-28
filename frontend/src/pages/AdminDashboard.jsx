@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getToken, setToken } from '../services/apiService';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
@@ -26,25 +27,33 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!sessionStorage.getItem('isAdmin')) {
+    const token = getToken();
+    if (!token) {
       navigate('/login');
       return;
     }
     async function fetchData() {
       try {
+        const headers = { Authorization: `Bearer ${token}` };
         const [stRes, rtRes, trRes, rcRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/api/admin/stats`),
-          axios.get(`${import.meta.env.VITE_API_URL}/api/admin/routes`),
-          axios.get(`${import.meta.env.VITE_API_URL}/api/admin/trains`),
-          axios.get(`${import.meta.env.VITE_API_URL}/api/admin/recent`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/admin/stats`, { headers }),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/admin/routes`, { headers }),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/admin/trains`, { headers }),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/admin/recent`, { headers }),
         ]);
         setStats(stRes.data); setRoutes(rtRes.data);
         setTrains(trRes.data); setRecent(rcRes.data);
-      } catch (err) { console.error('Error fetching admin data:', err); }
+      } catch (err) {
+        console.error('Error fetching admin data:', err);
+        if (err?.response?.status === 401 || err?.response?.status === 403) {
+          setToken(null);
+          navigate('/login');
+        }
+      }
       finally { setLoading(false); }
     }
     fetchData();
-  }, []);
+  }, [navigate]);
 
   if (loading) {
     return (

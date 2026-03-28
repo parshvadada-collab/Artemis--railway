@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import CursorFollower from './components/CursorFollower.jsx';
+import ChatWidget from './components/ChatWidget.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import BookTicket from './pages/BookTicket.jsx';
 import CheckStatus from './pages/CheckStatus.jsx';
@@ -43,6 +44,7 @@ const AppLayout = () => {
     return (
         <>
             <CursorFollower />
+            <ChatWidget />
             {!isLanding && <Navbar />}
             <div className={animClass} key={location.pathname}>
                 <Routes location={location}>

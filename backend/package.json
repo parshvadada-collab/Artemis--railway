@@ -1,7 +1,7 @@
 {
   "name": "railway-ticket-backend",
   "version": "1.0.0",
-  "description": "Railway Ticket Management & Predictive Analysis Engine — Backend",
+  "description": "Railway Ticket Management & Predictive Analysis Engine - Backend (PostgreSQL runtime)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -30,3 +30,4 @@
     "supertest": "^6.3.4"
   }
 }
+
