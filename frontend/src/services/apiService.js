@@ -98,6 +98,18 @@ export async function triggerReallocation(trainId) {
     return res.data;
 }
 
+export async function getPrebookingConfidence({ source, destination, seatClass, baseDate }) {
+    const res = await axios.get(`${BASE}/predictions/prebooking`, {
+        params: {
+            source,
+            destination,
+            seat_class: seatClass,
+            base_date: baseDate,
+        },
+    });
+    return res.data;
+}
+
 export async function sendChatMessage(message) {
     const res = await axios.post(`${BASE}/chat`, { message });
     return res.data;
